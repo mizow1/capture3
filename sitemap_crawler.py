@@ -34,6 +34,7 @@ class SitemapCrawler:
         self.url_tree: Dict[str, List[Dict]] = defaultdict(list)
         self.url_titles: Dict[str, str] = {}
         self.url_depths: Dict[str, int] = {}
+        self.failed_urls: Dict[str, str] = {}  # URL: エラー理由
 
         # 除外する拡張子
         self.excluded_extensions = {
@@ -74,8 +75,11 @@ class SitemapCrawler:
         parsed = urlparse(url)
         path = parsed.path
 
+        # パスが空の場合は/を設定
+        if not path:
+            path = '/'
         # 拡張子がない、またはディレクトリの場合は末尾に/を追加
-        if path and not path.endswith('/'):
+        elif not path.endswith('/'):
             # 最後のセグメントに拡張子があるかチェック
             last_segment = path.split('/')[-1]
             if '.' not in last_segment:
@@ -132,7 +136,7 @@ class SitemapCrawler:
         # 拡張子ありの場合は許可パターンのみOK
         return has_allowed_ending
 
-    def get_page_content(self, url: str) -> Tuple[str, str]:
+    def get_page_content(self, url: str) -> Tuple[str, str, str, str]:
         """
         ページのHTMLコンテンツとタイトルを取得
 
@@ -140,16 +144,20 @@ class SitemapCrawler:
             url: 取得するURL
 
         Returns:
-            (HTML文字列, ページタイトル)のタプル
+            (HTML文字列, ページタイトル, 最終URL, エラーメッセージ)のタプル
+            リダイレクトされた場合は最終URLを返す
         """
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
 
             # Content-Typeチェック
             content_type = response.headers.get('Content-Type', '')
             if 'text/html' not in content_type:
-                return None, None
+                return None, None, None, f"Content-Type: {content_type}"
+
+            # ステータスコードチェック
+            if response.status_code != 200:
+                return None, None, None, f"HTTP {response.status_code}"
 
             soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -158,11 +166,23 @@ class SitemapCrawler:
             if soup.title:
                 title = soup.title.string.strip() if soup.title.string else ''
 
-            return response.text, title
+            # 最終URLを取得（リダイレクト後）
+            final_url = response.url
 
+            return response.text, title, final_url, None
+
+        except requests.exceptions.Timeout:
+            error_msg = "タイムアウト"
+            print(f"エラー: {url} - {error_msg}")
+            return None, None, None, error_msg
+        except requests.exceptions.ConnectionError:
+            error_msg = "接続エラー"
+            print(f"エラー: {url} - {error_msg}")
+            return None, None, None, error_msg
         except Exception as e:
-            print(f"エラー: {url} - {str(e)}")
-            return None, None
+            error_msg = str(e)
+            print(f"エラー: {url} - {error_msg}")
+            return None, None, None, error_msg
 
     def extract_links(self, html: str, current_url: str) -> Set[str]:
         """
@@ -233,6 +253,9 @@ class SitemapCrawler:
             url: クロールするURL
             parent: 親ページのURL
         """
+        # URLを正規化
+        url = self.normalize_url(url)
+
         # 訪問済みチェック
         if url in self.visited_urls:
             return
@@ -241,12 +264,27 @@ class SitemapCrawler:
         depth = self.calculate_depth(url)
 
         print(f"クロール中 (深度{depth}): {url}")
-        self.visited_urls.add(url)
 
         # ページ取得
-        html, title = self.get_page_content(url)
+        html, title, final_url, error = self.get_page_content(url)
         if html is None:
+            # 取得失敗した場合はfailed_urlsに記録
+            self.failed_urls[url] = error or "不明なエラー"
             return
+
+        # 成功した場合のみ訪問済みに追加
+        self.visited_urls.add(url)
+
+        # リダイレクトされた場合、最終URLを正規化して使用
+        if final_url and final_url != url:
+            final_url = self.normalize_url(final_url)
+            # リダイレクト先も訪問済みに追加
+            if final_url != url and final_url not in self.visited_urls:
+                self.visited_urls.add(final_url)
+                # 最終URLの深度も保存
+                final_depth = self.calculate_depth(final_url)
+                self.url_titles[final_url] = title
+                self.url_depths[final_url] = final_depth
 
         # タイトルと深度を保存
         self.url_titles[url] = title
@@ -311,7 +349,23 @@ class SitemapCrawler:
                 row = [''] * depth + [url, title]
                 writer.writerow(row)
 
+            # 取得失敗URLがある場合、最後に追加
+            if self.failed_urls:
+                # 空行を追加
+                writer.writerow([])
+                writer.writerow([])
+                # セクションヘッダー
+                writer.writerow(['【取得失敗URL一覧】'])
+                writer.writerow(['URL', 'エラー理由'])
+
+                # 失敗URLをソートして出力
+                sorted_failed = sorted(self.failed_urls.items(), key=lambda x: x[0])
+                for url, error in sorted_failed:
+                    writer.writerow([url, error])
+
         print(f"CSV出力完了: {filename}")
+        if self.failed_urls:
+            print(f"  取得失敗URL: {len(self.failed_urls)}件")
 
     def export_to_html(self, filename: str):
         """
@@ -406,6 +460,43 @@ class SitemapCrawler:
             padding: 8px;
             margin: 5px 0;
         }}
+        .failed-section {{
+            margin-top: 40px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .failed-section h2 {{
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }}
+        .failed-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }}
+        .failed-table th {{
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: bold;
+        }}
+        .failed-table td {{
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            word-break: break-all;
+        }}
+        .failed-table tr:hover {{
+            background-color: #f9f9f9;
+        }}
+        .error-msg {{
+            color: #d32f2f;
+            font-size: 14px;
+        }}
     </style>
 </head>
 <body>
@@ -416,6 +507,8 @@ class SitemapCrawler:
     <div class="tree">
         {self._generate_tree_html(tree)}
     </div>
+
+    {self._generate_failed_urls_html()}
 
     <script>
         document.querySelectorAll('.toggle').forEach(toggle => {{
@@ -437,6 +530,48 @@ class SitemapCrawler:
             f.write(html_content)
 
         print(f"HTML出力完了: {filename}")
+        if self.failed_urls:
+            print(f"  取得失敗URL: {len(self.failed_urls)}件")
+
+    def _generate_failed_urls_html(self) -> str:
+        """
+        取得失敗URL一覧のHTMLを生成
+
+        Returns:
+            HTML文字列
+        """
+        if not self.failed_urls:
+            return ''
+
+        sorted_failed = sorted(self.failed_urls.items(), key=lambda x: x[0])
+
+        rows_html = ''
+        for url, error in sorted_failed:
+            rows_html += f'''
+            <tr>
+                <td><a href="{url}" target="_blank">{url}</a></td>
+                <td class="error-msg">{error}</td>
+            </tr>
+            '''
+
+        html = f'''
+    <div class="failed-section">
+        <h2>取得失敗URL一覧 ({len(self.failed_urls)}件)</h2>
+        <table class="failed-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">URL</th>
+                    <th style="width: 40%;">エラー理由</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
+        '''
+
+        return html
 
     def _build_tree(self, urls_data: List[Tuple[str, str, int]]) -> Dict:
         """
