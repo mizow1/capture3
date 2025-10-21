@@ -64,7 +64,7 @@ class SitemapCrawler:
 
     def normalize_url(self, url: str) -> str:
         """
-        URLを正規化（末尾スラッシュありに統一）
+        URLを正規化（末尾スラッシュありに統一、URLエンコード部分を小文字に統一）
 
         Args:
             url: 正規化するURL
@@ -72,6 +72,9 @@ class SitemapCrawler:
         Returns:
             正規化されたURL
         """
+        # URLエンコード部分を小文字に統一（%E3 -> %e3）
+        url = re.sub(r'%([0-9A-Fa-f]{2})', lambda m: m.group(0).lower(), url)
+
         parsed = urlparse(url)
         path = parsed.path
 
@@ -206,6 +209,18 @@ class SitemapCrawler:
             # フラグメントを除去
             absolute_url, _ = urldefrag(absolute_url)
 
+            # URL引数付きのURLの場合、ベースURL（引数を除いた部分）を追加
+            if '?' in absolute_url:
+                parsed = urlparse(absolute_url)
+                # 同一ドメインの場合のみ
+                if parsed.netloc == self.base_domain:
+                    # URL引数を除いたベースURLを作成
+                    base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+                    if self.is_valid_url(base_url):
+                        # URLを正規化（末尾スラッシュ統一）
+                        normalized_base_url = self.normalize_url(base_url)
+                        links.add(normalized_base_url)
+
             if self.is_valid_url(absolute_url):
                 # URLを正規化（末尾スラッシュ統一）
                 normalized_url = self.normalize_url(absolute_url)
@@ -278,8 +293,12 @@ class SitemapCrawler:
         # リダイレクトされた場合、最終URLを正規化して使用
         if final_url and final_url != url:
             final_url = self.normalize_url(final_url)
-            # リダイレクト先も訪問済みに追加
-            if final_url != url and final_url not in self.visited_urls:
+            # リダイレクト先のURLもバリデーション
+            if not self.is_valid_url(final_url):
+                # 無効なURLの場合はスキップ（元のURLのみ記録）
+                print(f"  リダイレクト先が無効なURL: {final_url}")
+            elif final_url != url and final_url not in self.visited_urls:
+                # リダイレクト先も訪問済みに追加
                 self.visited_urls.add(final_url)
                 # 最終URLの深度も保存
                 final_depth = self.calculate_depth(final_url)
