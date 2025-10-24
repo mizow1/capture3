@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サイトマップ - https://www.kurume-shinai.ac.jp/college/</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .controls {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .csv-download {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .csv-download:hover {
+            background-color: #45a049;
+        }
+        .tree {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tree-item {
+            margin: 10px 0;
+        }
+        .tree-content {
+            padding-left: 20px;
+            border-left: 2px solid #e0e0e0;
+            margin-left: 10px;
+        }
+        .toggle {
+            cursor: pointer;
+            user-select: none;
+            padding: 8px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px 0;
+            transition: background-color 0.3s;
+        }
+        .toggle:hover {
+            background-color: #e8e8e8;
+        }
+        .toggle-arrow {
+            display: inline-block;
+            transition: transform 0.3s;
+            margin-right: 5px;
+        }
+        .toggle.open .toggle-arrow {
+            transform: rotate(90deg);
+        }
+        .checkbox {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+        .link {
+            color: #1976D2;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .link:hover {
+            text-decoration: underline;
+            color: #1565C0;
+        }
+        .url {
+            color: #666;
+            font-size: 12px;
+            margin-top: 3px;
+            word-break: break-all;
+        }
+        .children {
+            display: none;
+            margin-top: 5px;
+        }
+        .children.show {
+            display: block;
+        }
+        .no-children {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        .failed-section {
+            margin-top: 40px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .failed-section h2 {
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .failed-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .failed-table th {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: bold;
+        }
+        .failed-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            word-break: break-all;
+        }
+        .failed-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .error-msg {
+            color: #d32f2f;
+            font-size: 14px;
+        }
+        .count-info {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>サイトマップ</h1>
+    <p><strong>ベースURL:</strong> https://www.kurume-shinai.ac.jp/college/</p>
+    <p><strong>総ページ数:</strong> <span id="total-count">6</span></p>
+
+    <div class="controls">
+        <div class="count-info">
+            チェック済みURL: <span id="checked-count">6</span> / <span id="total-urls">6</span>
+        </div>
+        <button class="csv-download" onclick="downloadCSV()">チェック済みURLをCSVダウンロード</button>
+    </div>
+
+    <div class="tree">
+        
+                <div class="tree-item">
+                    <div class="toggle">
+                        <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/" data-title="久留米信愛短期大学  久留米信愛短期大学公式サイト。地域に愛され、地域に貢献する、開かれた大学を目指して。 信愛は学生を育てる短期大学です。久留米市御井町。" checked>
+                        <span class="toggle-arrow">▶</span>
+                        <a href="https://www.kurume-shinai.ac.jp/college/" class="link" target="_blank">久留米信愛短期大学  久留米信愛短期大学公式サイト。地域に愛され、地域に貢献する、開かれた大学を目指して。 信愛は学生を育てる短期大学です。久留米市御井町。</a>
+                        <div class="url">https://www.kurume-shinai.ac.jp/college/</div>
+                    </div>
+                    <div class="children tree-content">
+                        
+                <div class="tree-item no-children">
+                    <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/closeinfo/" data-title="久留米信愛短期大学  学生募集停止のお知らせ" checked>
+                    <a href="https://www.kurume-shinai.ac.jp/college/closeinfo/" class="link" target="_blank">久留米信愛短期大学  学生募集停止のお知らせ</a>
+                    <div class="url">https://www.kurume-shinai.ac.jp/college/closeinfo/</div>
+                </div>
+                
+                <div class="tree-item">
+                    <div class="toggle">
+                        <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/dousoukai/" data-title="久留米信愛短期大学  同窓会" checked>
+                        <span class="toggle-arrow">▶</span>
+                        <a href="https://www.kurume-shinai.ac.jp/college/dousoukai/" class="link" target="_blank">久留米信愛短期大学  同窓会</a>
+                        <div class="url">https://www.kurume-shinai.ac.jp/college/dousoukai/</div>
+                    </div>
+                    <div class="children tree-content">
+                        
+                <div class="tree-item no-children">
+                    <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/dousoukai/d-dayori/" data-title="久留米信愛短期大学  同窓生だより・母校だより" checked>
+                    <a href="https://www.kurume-shinai.ac.jp/college/dousoukai/d-dayori/" class="link" target="_blank">久留米信愛短期大学  同窓生だより・母校だより</a>
+                    <div class="url">https://www.kurume-shinai.ac.jp/college/dousoukai/d-dayori/</div>
+                </div>
+                
+                <div class="tree-item no-children">
+                    <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/dousoukai/jigyou/" data-title="久留米信愛短期大学  事業報告・部会報告" checked>
+                    <a href="https://www.kurume-shinai.ac.jp/college/dousoukai/jigyou/" class="link" target="_blank">久留米信愛短期大学  事業報告・部会報告</a>
+                    <div class="url">https://www.kurume-shinai.ac.jp/college/dousoukai/jigyou/</div>
+                </div>
+                
+                    </div>
+                </div>
+                
+                <div class="tree-item no-children">
+                    <input type="checkbox" class="url-checkbox checkbox" value="https://www.kurume-shinai.ac.jp/college/for-graduates/" data-title="久留米信愛短期大学  卒業生の方へ" checked>
+                    <a href="https://www.kurume-shinai.ac.jp/college/for-graduates/" class="link" target="_blank">久留米信愛短期大学  卒業生の方へ</a>
+                    <div class="url">https://www.kurume-shinai.ac.jp/college/for-graduates/</div>
+                </div>
+                
+                    </div>
+                </div>
+                
+    </div>
+
+    
+    <div class="failed-section">
+        <h2>取得失敗URL一覧 (30件)</h2>
+        <table class="failed-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">URL</th>
+                    <th style="width: 40%;">エラー理由</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/access/" target="_blank">https://www.kurume-shinai.ac.jp/college/access/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/campuslife/" target="_blank">https://www.kurume-shinai.ac.jp/college/campuslife/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/campuslife/calendar/" target="_blank">https://www.kurume-shinai.ac.jp/college/campuslife/calendar/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/campuslife/clubs/" target="_blank">https://www.kurume-shinai.ac.jp/college/campuslife/clubs/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/campuslife/photogallery/" target="_blank">https://www.kurume-shinai.ac.jp/college/campuslife/photogallery/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/campuslife/shisetsu/" target="_blank">https://www.kurume-shinai.ac.jp/college/campuslife/shisetsu/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/chiiki/" target="_blank">https://www.kurume-shinai.ac.jp/college/chiiki/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/chiiki/koryu/" target="_blank">https://www.kurume-shinai.ac.jp/college/chiiki/koryu/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/chiiki/sankaku/" target="_blank">https://www.kurume-shinai.ac.jp/college/chiiki/sankaku/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/chiiki/shougai/" target="_blank">https://www.kurume-shinai.ac.jp/college/chiiki/shougai/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/chiiki/tsudoi/" target="_blank">https://www.kurume-shinai.ac.jp/college/chiiki/tsudoi/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/contact/" target="_blank">https://www.kurume-shinai.ac.jp/college/contact/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/course/" target="_blank">https://www.kurume-shinai.ac.jp/college/course/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/facebook-page/" target="_blank">https://www.kurume-shinai.ac.jp/college/facebook-page/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/for_examinee/" target="_blank">https://www.kurume-shinai.ac.jp/college/for_examinee/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/for_parents/" target="_blank">https://www.kurume-shinai.ac.jp/college/for_parents/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/for_public/" target="_blank">https://www.kurume-shinai.ac.jp/college/for_public/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/for_student/" target="_blank">https://www.kurume-shinai.ac.jp/college/for_student/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/guide/" target="_blank">https://www.kurume-shinai.ac.jp/college/guide/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/guide/joho/" target="_blank">https://www.kurume-shinai.ac.jp/college/guide/joho/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/guide/president/" target="_blank">https://www.kurume-shinai.ac.jp/college/guide/president/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/headline/" target="_blank">https://www.kurume-shinai.ac.jp/college/headline/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/attention/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/attention/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/introduction/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/introduction/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/naitei/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/naitei/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/saiyo/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/saiyo/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/job/support/" target="_blank">https://www.kurume-shinai.ac.jp/college/job/support/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/nyugaku/open-campus/" target="_blank">https://www.kurume-shinai.ac.jp/college/nyugaku/open-campus/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            <tr>
+                <td><a href="https://www.kurume-shinai.ac.jp/college/syoumei/" target="_blank">https://www.kurume-shinai.ac.jp/college/syoumei/</a></td>
+                <td class="error-msg">HTTP 404</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </div>
+        
+
+    <script>
+        // LocalStorageのキー
+        const STORAGE_KEY = 'sitemap_checked_urls';
+
+        // チェック状態を保存
+        function saveCheckState() {
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            const checkedUrls = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    checkedUrls.push(cb.value);
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedUrls));
+        }
+
+        // チェック状態を復元
+        function loadCheckState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            const checkedUrls = JSON.parse(saved);
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkedUrls.includes(cb.value);
+            });
+            updateCounts();
+        }
+
+        // カウント更新
+        function updateCounts() {
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            const totalCount = checkboxes.length;
+            let checkedCount = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) checkedCount++;
+            });
+
+            document.getElementById('checked-count').textContent = checkedCount;
+            document.getElementById('total-count').textContent = checkedCount;
+            document.getElementById('total-urls').textContent = totalCount;
+
+            // アコーディオンヘッダーのカウント更新
+            updateAccordionCounts();
+        }
+
+        // アコーディオンヘッダーのカウント更新
+        function updateAccordionCounts() {
+            const accordions = document.querySelectorAll('.toggle');
+            accordions.forEach(accordion => {
+                const parent = accordion.parentElement;
+                const childCheckboxes = parent.querySelectorAll('.url-checkbox');
+                let checkedInSection = 0;
+
+                childCheckboxes.forEach(cb => {
+                    if (cb.checked) checkedInSection++;
+                });
+
+                // カウント表示を更新（既存のカウント表示を探すか新規作成）
+                let countSpan = accordion.querySelector('.accordion-count');
+                if (!countSpan) {
+                    countSpan = document.createElement('span');
+                    countSpan.className = 'accordion-count';
+                    countSpan.style.marginLeft = '10px';
+                    countSpan.style.fontSize = '12px';
+                    countSpan.style.color = '#666';
+                    accordion.appendChild(countSpan);
+                }
+                countSpan.textContent = `(${checkedInSection}/${childCheckboxes.length})`;
+            });
+        }
+
+        // チェックボックス変更イベント
+        document.querySelectorAll('.url-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateCounts();
+                saveCheckState();
+            });
+        });
+
+        // アコーディオン開閉
+        document.querySelectorAll('.toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // チェックボックスクリックの場合は開閉しない
+                if (e.target.classList.contains('url-checkbox')) {
+                    e.stopPropagation();
+                    return;
+                }
+
+                this.classList.toggle('open');
+                const children = this.parentElement.querySelector('.children');
+                if (children) {
+                    children.classList.toggle('show');
+                }
+            });
+        });
+
+        // CSVダウンロード
+        function downloadCSV() {
+            const checkboxes = document.querySelectorAll('.url-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('チェックされたURLがありません');
+                return;
+            }
+
+            let csvContent = '\uFEFFURL,タイトル\n'; // BOM付きUTF-8
+            checkboxes.forEach(cb => {
+                const url = cb.value;
+                const title = cb.dataset.title || '';
+                // CSVエスケープ
+                const escapedTitle = title.replace(/"/g, '""');
+                csvContent += `"${url}","${escapedTitle}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `sitemap_checked_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ページ読み込み時に状態を復元
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCheckState();
+        });
+    </script>
+</body>
+</html>

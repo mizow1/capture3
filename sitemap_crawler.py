@@ -118,6 +118,14 @@ class SitemapCrawler:
         if parsed.netloc != self.base_domain:
             return False
 
+        # 指定したURL以下の階層のみ許可（上位階層は除外）
+        url_path = parsed.path.rstrip('/')
+        # base_pathが空またはルートでない場合のみチェック
+        if self.base_path and self.base_path != '/':
+            # URLパスがbase_pathと完全一致、またはbase_path + '/'で始まる場合のみ許可
+            if url_path != self.base_path and not url_path.startswith(self.base_path + '/'):
+                return False
+
         # URL引数付きはスキップ
         if '?' in url:
             return False
@@ -417,6 +425,30 @@ class SitemapCrawler:
             border-bottom: 3px solid #4CAF50;
             padding-bottom: 10px;
         }}
+        .controls {{
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .csv-download {{
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }}
+        .csv-download:hover {{
+            background-color: #45a049;
+        }}
         .tree {{
             background-color: white;
             border-radius: 8px;
@@ -444,13 +476,19 @@ class SitemapCrawler:
         .toggle:hover {{
             background-color: #e8e8e8;
         }}
-        .toggle::before {{
-            content: '▶ ';
+        .toggle-arrow {{
             display: inline-block;
             transition: transform 0.3s;
+            margin-right: 5px;
         }}
-        .toggle.open::before {{
+        .toggle.open .toggle-arrow {{
             transform: rotate(90deg);
+        }}
+        .checkbox {{
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
         }}
         .link {{
             color: #1976D2;
@@ -516,12 +554,23 @@ class SitemapCrawler:
             color: #d32f2f;
             font-size: 14px;
         }}
+        .count-info {{
+            font-size: 14px;
+            color: #666;
+        }}
     </style>
 </head>
 <body>
     <h1>サイトマップ</h1>
     <p><strong>ベースURL:</strong> {self.base_url}</p>
-    <p><strong>総ページ数:</strong> {len(urls_data)}</p>
+    <p><strong>総ページ数:</strong> <span id="total-count">{len(urls_data)}</span></p>
+
+    <div class="controls">
+        <div class="count-info">
+            チェック済みURL: <span id="checked-count">{len(urls_data)}</span> / <span id="total-urls">{len(urls_data)}</span>
+        </div>
+        <button class="csv-download" onclick="downloadCSV()">チェック済みURLをCSVダウンロード</button>
+    </div>
 
     <div class="tree">
         {self._generate_tree_html(tree)}
@@ -530,15 +579,135 @@ class SitemapCrawler:
     {self._generate_failed_urls_html()}
 
     <script>
+        // LocalStorageのキー
+        const STORAGE_KEY = 'sitemap_checked_urls';
+
+        // チェック状態を保存
+        function saveCheckState() {{
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            const checkedUrls = [];
+            checkboxes.forEach(cb => {{
+                if (cb.checked) {{
+                    checkedUrls.push(cb.value);
+                }}
+            }});
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedUrls));
+        }}
+
+        // チェック状態を復元
+        function loadCheckState() {{
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            const checkedUrls = JSON.parse(saved);
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            checkboxes.forEach(cb => {{
+                cb.checked = checkedUrls.includes(cb.value);
+            }});
+            updateCounts();
+        }}
+
+        // カウント更新
+        function updateCounts() {{
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            const totalCount = checkboxes.length;
+            let checkedCount = 0;
+
+            checkboxes.forEach(cb => {{
+                if (cb.checked) checkedCount++;
+            }});
+
+            document.getElementById('checked-count').textContent = checkedCount;
+            document.getElementById('total-count').textContent = checkedCount;
+            document.getElementById('total-urls').textContent = totalCount;
+
+            // アコーディオンヘッダーのカウント更新
+            updateAccordionCounts();
+        }}
+
+        // アコーディオンヘッダーのカウント更新
+        function updateAccordionCounts() {{
+            const accordions = document.querySelectorAll('.toggle');
+            accordions.forEach(accordion => {{
+                const parent = accordion.parentElement;
+                const childCheckboxes = parent.querySelectorAll('.url-checkbox');
+                let checkedInSection = 0;
+
+                childCheckboxes.forEach(cb => {{
+                    if (cb.checked) checkedInSection++;
+                }});
+
+                // カウント表示を更新（既存のカウント表示を探すか新規作成）
+                let countSpan = accordion.querySelector('.accordion-count');
+                if (!countSpan) {{
+                    countSpan = document.createElement('span');
+                    countSpan.className = 'accordion-count';
+                    countSpan.style.marginLeft = '10px';
+                    countSpan.style.fontSize = '12px';
+                    countSpan.style.color = '#666';
+                    accordion.appendChild(countSpan);
+                }}
+                countSpan.textContent = `(${{checkedInSection}}/${{childCheckboxes.length}})`;
+            }});
+        }}
+
+        // チェックボックス変更イベント
+        document.querySelectorAll('.url-checkbox').forEach(checkbox => {{
+            checkbox.addEventListener('change', function() {{
+                updateCounts();
+                saveCheckState();
+            }});
+        }});
+
+        // アコーディオン開閉
         document.querySelectorAll('.toggle').forEach(toggle => {{
             toggle.addEventListener('click', function(e) {{
-                e.stopPropagation();
+                // チェックボックスクリックの場合は開閉しない
+                if (e.target.classList.contains('url-checkbox')) {{
+                    e.stopPropagation();
+                    return;
+                }}
+
                 this.classList.toggle('open');
                 const children = this.parentElement.querySelector('.children');
                 if (children) {{
                     children.classList.toggle('show');
                 }}
             }});
+        }});
+
+        // CSVダウンロード
+        function downloadCSV() {{
+            const checkboxes = document.querySelectorAll('.url-checkbox:checked');
+            if (checkboxes.length === 0) {{
+                alert('チェックされたURLがありません');
+                return;
+            }}
+
+            let csvContent = '\\uFEFFURL,タイトル\\n'; // BOM付きUTF-8
+            checkboxes.forEach(cb => {{
+                const url = cb.value;
+                const title = cb.dataset.title || '';
+                // CSVエスケープ
+                const escapedTitle = title.replace(/"/g, '""');
+                csvContent += `"${{url}}","${{escapedTitle}}"\\n`;
+            }});
+
+            const blob = new Blob([csvContent], {{ type: 'text/csv;charset=utf-8;' }});
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `sitemap_checked_${{timestamp}}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }}
+
+        // ページ読み込み時に状態を復元
+        window.addEventListener('DOMContentLoaded', function() {{
+            loadCheckState();
         }});
     </script>
 </body>
@@ -639,11 +808,16 @@ class SitemapCrawler:
 
         for node in tree.get('children', []):
             has_children = len(node.get('children', [])) > 0
+            # HTMLエスケープ
+            escaped_title = node['title'].replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+            escaped_url = node['url'].replace('"', '&quot;')
 
             if has_children:
                 html += f'''
                 <div class="tree-item">
                     <div class="toggle">
+                        <input type="checkbox" class="url-checkbox checkbox" value="{escaped_url}" data-title="{escaped_title}" checked>
+                        <span class="toggle-arrow">▶</span>
                         <a href="{node['url']}" class="link" target="_blank">{node['title']}</a>
                         <div class="url">{node['url']}</div>
                     </div>
@@ -655,6 +829,7 @@ class SitemapCrawler:
             else:
                 html += f'''
                 <div class="tree-item no-children">
+                    <input type="checkbox" class="url-checkbox checkbox" value="{escaped_url}" data-title="{escaped_title}" checked>
                     <a href="{node['url']}" class="link" target="_blank">{node['title']}</a>
                     <div class="url">{node['url']}</div>
                 </div>
